@@ -46,7 +46,7 @@
     const fsSource = `
       precision mediump float;
       void main() {
-        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); // 赤
+        gl_FragColor = vec4(1.0, 1.0, 0, 1.0); // 赤
       }
     `;
 
@@ -68,9 +68,10 @@
 
     // 頂点データを GPU に送る
     const positions = new Float32Array([
-       0.0,  0.5,
-      -0.5, -0.5,
-       0.5, -0.5,
+      0, 0.75,
+      0, 0.25,
+      0.75, 0.75,
+      0.75, 0.25,
     ]);
     const buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -83,7 +84,7 @@
     // クリアして描画
     gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   </script>
 </body>
 </html>

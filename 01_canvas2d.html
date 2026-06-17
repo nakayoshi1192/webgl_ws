@@ -34,11 +34,15 @@
     const canvas = document.getElementById('c');
     const ctx = canvas.getContext('2d');
 
-    ctx.fillStyle = 'red';
-    ctx.fillRect(10, 10, 100, 100); // 赤い四角
+    ctx.beginPath();
+    ctx.fillStyle = 'yellow';
+    ctx.fillRect(10, 15, 50, 100); // 赤い四角
+
+    ctx.fillStyle = 'green';
+    ctx.strokeRect(150, 45, 50, 50); // 赤い四角
 
     ctx.beginPath();
-    ctx.arc(200, 150, 50, 0, Math.PI * 2);
+    ctx.arc(250, 150, 20, 0, Math.PI * 2);
     ctx.fillStyle = 'blue';
     ctx.fill(); // 青い円
   </script>

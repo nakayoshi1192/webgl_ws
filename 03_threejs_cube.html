@@ -25,12 +25,23 @@
   <script type="importmap">
     { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
   </script>
+
   <script type="module">
     import * as THREE from 'three';
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(
-      75, window.innerWidth / window.innerHeight, 0.1, 1000
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    // const camera = new THREE.PerspectiveCamera(
+    //   100,
+    //   width / height,
+    //   0.1,
+    //   1000
+    // );
+    const camera = new THREE.OrthographicCamera(
+      -5 * width / height, 5 * width / height,
+      5, -5,
+      0.1, 100
     );
     camera.position.z = 3;
 
@@ -40,21 +51,41 @@
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
 
-    const cube = new THREE.Mesh(
-      new THREE.BoxGeometry(1, 1, 1),
-      new THREE.MeshStandardMaterial({ color: 0x00aaff })
+    const sphere = new THREE.Mesh(
+      new THREE.SphereGeometry(0.75, 32, 32),
+      new THREE.MeshStandardMaterial({ color: 0xdd9999 })
     );
-    scene.add(cube);
+    scene.add(sphere);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+    const torus01 = new THREE.Mesh(
+      new THREE.TorusGeometry(0.9, 0.025, 12, 48, Math.PI * 2),
+      new THREE.MeshBasicMaterial({ color: 0x9999dd })
+    );
+    scene.add(torus01);
+
+    const torus02 = new THREE.Mesh(
+      new THREE.TorusGeometry(1, 0.025, 12, 48, Math.PI * 2),
+      new THREE.MeshBasicMaterial({ color: 0x99dd99 })
+    );
+    scene.add(torus02);
+
+    const torus03 = new THREE.Mesh(
+      new THREE.TorusGeometry(1.1, 0.025, 12, 48, Math.PI * 2),
+      new THREE.MeshBasicMaterial({ color: 0xdd9999 })
+    );
+    scene.add(torus03);
+    torus03.rotation.x = Math.PI / 2;
+
+    // scene.add(new THREE.AmbientLight(0xffffff, 0.3));
     const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(2, 2, 2);
+    light.position.set(0, 2, 1);
     scene.add(light);
 
     function animate() {
       requestAnimationFrame(animate);
-      cube.rotation.x += 0.01;
-      cube.rotation.y += 0.01;
+      torus01.rotation.x += 0.01;
+      torus02.rotation.y += 0.01;
+      torus03.rotation.y += 0.01;
       renderer.render(scene, camera);
     }
     animate();
