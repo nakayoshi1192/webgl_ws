@@ -38,6 +38,27 @@
   </script>
   <script type="module">
     import * as THREE from 'three';
+    import { GLTFLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+
+    const gltf = new GLTFLoader();
+    let ratio = window.scrollY / (document.body.scrollHeight - innerHeight);
+    let car01, car02; // グローバル変数として宣言
+
+    gltf.load('./models/Car.glb', (carData01) => {
+      car01 = carData01;
+      car01.scene.position.set(70, 0, 3.5);
+      car01.scene.scale.set(.5, .5, .5);
+      car01.scene.rotation.y = Math.PI / -2.05;
+      scene.add(car01.scene);
+    });
+    gltf.load('./models/SportsCar.glb', (carData02) => {
+      car02 = carData02;
+      car02.scene.position.set(100 - ratio * 120, 0, 5);
+      car02.scene.scale.set(.5, .5, .5);
+      car02.scene.rotation.y = Math.PI / -2.05;
+      scene.add(car02.scene);
+    });
+    
 
     const canvas = document.getElementById('bg');
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -46,15 +67,25 @@
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xffffff); // 真っ白の背景
 
-    // 並行投影カメラ
     const aspect = innerWidth / innerHeight;
-    const viewSize = 10; // 視野の縦サイズ
-    const camera = new THREE.OrthographicCamera(
-      -viewSize * aspect, viewSize * aspect, // left, right
-       viewSize, -viewSize,                   // top, bottom
-       0.1, 200                               // near, far
+
+    // // 並行投影カメラ
+    // const viewSize = 10; // 視野の縦サイズ
+    // const camera = new THREE.OrthographicCamera(
+    //   -viewSize * aspect, viewSize * aspect, // left, right
+    //    viewSize, -viewSize,                   // top, bottom
+    //    0.1, 200                               // near, far
+    // );
+
+    // 透視投影カメラ
+    const camera = new THREE.PerspectiveCamera(
+      40,      //視野角
+      aspect,   //アスペクト比
+      0.1,      //near 区間の開始距離
+      500       //far  区間の終了距離
     );
     // 斜め上から見下ろす位置に置く（建物が右上→左下に流れるよう、x方向を反転）
+    // camera.position.set(-20, 20, 20);
     camera.position.set(-20, 20, 20);
     camera.lookAt(0, 0, 0);
 
@@ -69,7 +100,7 @@
     // 建物を等間隔に並べる
     for (let i = 0; i < 60; i++) {
       const h = 1 + Math.random() * 3;
-      const palette = [0x88bbee, 0xaaccee, 0xbbddf2, 0xcce4f5];
+      const palette = [0x88bbee, 0xaaccee, 0xbbddf2, 0xcce4f5, 0xffffff , 0xffffff];
       const building = new THREE.Mesh(
         new THREE.BoxGeometry(1, h, 1),
         new THREE.MeshLambertMaterial({
@@ -91,10 +122,19 @@
 
     // スクロール位置をそのままカメラ位置に反映（イージングなし）
     function updateCamera() {
-      const ratio = window.scrollY / (document.body.scrollHeight - innerHeight);
+      let ratio = window.scrollY / (document.body.scrollHeight - innerHeight);
       camera.position.x = 60 - ratio * 80; // 街の上を逆方向に進む
       camera.lookAt(camera.position.x + 20, 0, camera.position.z - 20);
+      
+      // 車もスクロール位置に合わせて移動
+      // if (car01) {
+      //   car01.scene.position.x = 70 - ratio * 50;
+      // }
+      if (car02) {
+        car02.scene.position.x = 100 - ratio * 120;
+      }
     }
+
     window.addEventListener('scroll', updateCamera);
     updateCamera();
 
