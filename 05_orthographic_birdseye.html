@@ -43,13 +43,27 @@
     const gltf = new GLTFLoader();
     let ratio = window.scrollY / (document.body.scrollHeight - innerHeight);
     let car01, car02; // グローバル変数として宣言
+    let car01Speed = 0.25;
+    let car01Spin = false;
+    
+    // Raycaster の準備
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let car01Meshes = [];
 
     gltf.load('./models/Car.glb', (carData01) => {
       car01 = carData01;
-      car01.scene.position.set(70, 0, 3.5);
+      car01.scene.position.set(0, 0, 3.5);
       car01.scene.scale.set(.5, .5, .5);
-      car01.scene.rotation.y = Math.PI / -2.05;
+      car01.scene.rotation.y = Math.PI / 2.05;
       scene.add(car01.scene);
+      
+      // car01 の全メッシュを取得
+      car01.scene.traverse((child) => {
+        if (child.isMesh) {
+          car01Meshes.push(child);
+        }
+      });
     });
     gltf.load('./models/SportsCar.glb', (carData02) => {
       car02 = carData02;
@@ -100,14 +114,18 @@
     // 建物を等間隔に並べる
     for (let i = 0; i < 60; i++) {
       const h = 1 + Math.random() * 3;
-      const palette = [0x88bbee, 0xaaccee, 0xbbddf2, 0xcce4f5, 0xffffff , 0xffffff];
+      const palette = [0x88bbee, 0xaaccee, 0xbbddf2, 0xcce4f5, 0xffffff , 0xfffbbbb];
       const building = new THREE.Mesh(
         new THREE.BoxGeometry(1, h, 1),
         new THREE.MeshLambertMaterial({
           color: palette[i % palette.length],
         })
       );
-      building.position.set(i * 3 - 30, h / 2, (i % 2) * 2);
+      building.position.set(
+        i * 3 - 30,
+        h / 2,
+        (i % 2) * 2
+      );
       scene.add(building);
     }
 
@@ -124,22 +142,57 @@
     function updateCamera() {
       let ratio = window.scrollY / (document.body.scrollHeight - innerHeight);
       camera.position.x = 60 - ratio * 80; // 街の上を逆方向に進む
-      camera.lookAt(camera.position.x + 20, 0, camera.position.z - 20);
+      camera.position.y = 20 - ratio * 10;
+      camera.lookAt(camera.position.x + 20 + mouse.x * 0.5, mouse.y * 0.5, camera.position.z - 20);
       
-      // 車もスクロール位置に合わせて移動
-      // if (car01) {
-      //   car01.scene.position.x = 70 - ratio * 50;
-      // }
+      // 車2はスクロール位置に合わせて移動
       if (car02) {
         car02.scene.position.x = 100 - ratio * 120;
       }
     }
+
+    // マウス移動を追跡
+    window.addEventListener('mousemove', (event) => {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      camera.lookAt(camera.position.x + 20 + mouse.x * 0.5, mouse.y * 0.5, camera.position.z - 20);
+    });
 
     window.addEventListener('scroll', updateCamera);
     updateCamera();
 
     function animate() {
       requestAnimationFrame(animate);
+      
+      // Raycaster で car01 との交差判定
+      if (car01Meshes.length > 0 && !car01Spin) {
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(car01Meshes);
+        
+        if (intersects.length > 0) {
+          car01Spin = true;
+          setTimeout(()=>{
+            car01Spin = false;
+          }, 1000);
+        }
+      }
+      
+      // car01の移動
+      if(car01){
+        if(car01Spin){
+          car01.scene.rotation.y += 0.5;
+          car01Speed = -0.125;
+        }else{
+          car01.scene.rotation.y = Math.PI / 2.05;
+          car01Speed = 0.25;
+        }
+
+        // ループ
+        if(car01.scene.position.x >= 150){
+          car01.scene.position.x = -100;
+        }
+        car01.scene.position.x += car01Speed;
+      }
       renderer.render(scene, camera);
     }
     animate();
