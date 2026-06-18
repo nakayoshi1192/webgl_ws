@@ -49,7 +49,6 @@
     // Raycaster の準備
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
-    let car01Meshes = [];
 
     gltf.load('./models/Car.glb', (carData01) => {
       car01 = carData01;
@@ -57,13 +56,6 @@
       car01.scene.scale.set(.5, .5, .5);
       car01.scene.rotation.y = Math.PI / 2.05;
       scene.add(car01.scene);
-      
-      // car01 の全メッシュを取得
-      car01.scene.traverse((child) => {
-        if (child.isMesh) {
-          car01Meshes.push(child);
-        }
-      });
     });
     gltf.load('./models/SportsCar.glb', (carData02) => {
       car02 = carData02;
@@ -165,9 +157,9 @@
       requestAnimationFrame(animate);
       
       // Raycaster で car01 との交差判定
-      if (car01Meshes.length > 0 && !car01Spin) {
+      if (car01 && !car01Spin) {
         raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(car01Meshes);
+        const intersects = raycaster.intersectObject(car01.scene, true);
         
         if (intersects.length > 0) {
           car01Spin = true;
